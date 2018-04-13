@@ -13,7 +13,7 @@ from random import randint
 
 logging.basicConfig(level=logging.INFO)
 # Here you can modify the bot's prefix and description and wether it sends help in direct messages or not.
-client = Bot(description="Lingo 2 by Pyroan!", command_prefix=("L!", "!"), pm_help=True)
+client = Bot(description="Lingo 2 by Pyroan!", command_prefix=("L!", "!", "l!"), pm_help=True)
 
 settings = configparser.RawConfigParser()
 settings.read('config.cfg')
@@ -216,7 +216,7 @@ async def nationality(ctx, *, country=None):
 @client.group(aliases=["language"], pass_context=True)
 async def lang(ctx):
     if ctx.invoked_subcommand is None:
-        await client.say("Usage: `L!lang [add|remove] [fluent|conversational|learning] <language name/ISO639 code>`\n"
+        await client.say("Usage: `L!lang [add|remove] [fluent|conversational|learning] <language name | ISO639 code>`\n"
                          "For a list of available languages, try `L!list languages`")
 
 
@@ -264,6 +264,7 @@ async def l_add(ctx, proficiency=None, language=None):
     else:
         user = ctx.message.author
         new_role_name = await find_language_role(proficiency, language)
+        if new_role_name is None: return
         # Try to find role. If it doesn't exist, create one
         new_role = find(lambda r: r.name == new_role_name, ctx.message.server.roles)
         if new_role is None:

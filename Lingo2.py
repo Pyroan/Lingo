@@ -212,6 +212,21 @@ async def nationality(ctx, *, country=None):
                                  "(Ask a moderator to add the role and try again)" % country_role)
 
 
+# Sets "Verified" role, for users that wish to have a role but don't want to reveal their nationality
+@client.command(pass_context=True)
+async def verify(ctx):
+    user = ctx.message.author
+    role = find(lambda r: r.name == "Verified", ctx.message.server.roles)
+    if role is not None:
+        if role in user.roles:
+            await client.say("You're already verified!")
+        else:
+            await client.add_roles(user, role)
+            await client.say(":tada: %s is now verified. Welcome!" % user.mention)
+    else:
+        await client.say("This server has no \"Verified\" role. :frowning:")
+
+
 # Functions for adding/removing/setting language roles
 @client.group(aliases=["language"], pass_context=True)
 async def lang(ctx):

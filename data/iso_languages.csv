@@ -1,6 +1,7 @@
 SQ,SQI,ALB,Albanian
 AR,ARA,,Arabic
 HY,HYE,ARM,Armenian
+BG,BUL,,Bulgarian
 MY,MYA,BUR,Burmese
 CA,CAT,,Catalan
 ZH,ZHO,CHI,Chinese
@@ -29,6 +30,7 @@ LV,LAV,,Latvian
 LT,LIT,,Lithuanian
 MS,MSA,MAY,Malay
 NO,NOR,,Norwegian
+OC,OCI,,Occitan
 FA,FAS,PER,Persian
 YZ,YNZ,,Pittsburghese
 PL,POL,,Polish
@@ -45,4 +47,5 @@ UR,URD,,Urdu
 VI,VIE,,Vietnamese
 VS,VIS,,Visayan
 CY,CYM,WEL,Welsh
+,YSV,,Yeshivish
 YI,YID,,Yiddish

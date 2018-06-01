@@ -324,10 +324,13 @@ async def langs(ctx, user=None):
         if user is None:
             await client.say("User not found. Did you @mention them?")
             return
-    user_langs = []
+    user_langs = {'Fluent': [], 'Conversational': [], 'Learning': []}
     matcher = re.compile("[\[(/]\w{2,3}[\])/]")
+    found = False # Flag that proves we found at least one role
+    # Search through user roles for languages
     for role in user.roles:
         if matcher.fullmatch(role.name):
+            found = True
             # Find language
             language = ''
             for entry in languages:
@@ -342,15 +345,16 @@ async def langs(ctx, user=None):
                 proficiency = "Conversational"
             elif role.name[0] == '/':
                 proficiency = "Learning"
-            user_langs.append([language, proficiency])
+            user_langs[proficiency].append(language)
     # Print language table
-    if len(user_langs) == 0:
+    if not found:
         await client.say("{} hasn't added any languages yet!".format(user.name))
         return
     output = ["Listing languages for {}:\n```\n".format(user.name)]
-    user_langs.sort(key=lambda la: la[0])
-    for entry in user_langs:
-        output.append("{}: {}\n".format(entry[0], entry[1]))
+    for s in ['Fluent', 'Conversational', 'Learning']:
+        user_langs[s].sort(key=lambda la: la[0])
+        for entry in user_langs[s]:
+            output.append("{}: {}\n".format(entry, s))
     output.append("```")
     await client.say(''.join(output))
 

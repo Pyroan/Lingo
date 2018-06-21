@@ -19,7 +19,7 @@ client = Bot(description="Lingo 2 by Pyroan!", command_prefix=("L!", "!", "l!"),
 # Set up configuration
 dev_id = 'Error'
 token = 'Error'
-is_production = os.environ.get('IS_HEROKU"', None)
+is_production = os.environ.get('IS_HEROKU', None)
 if is_production:
     dev_id = os.environ['DEV_ID']
     token = os.environ['TOKEN']

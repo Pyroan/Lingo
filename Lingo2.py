@@ -6,6 +6,7 @@ from discord.utils import find
 import platform
 import logging
 
+import os
 import csv
 import configparser
 import re
@@ -15,12 +16,20 @@ logging.basicConfig(level=logging.INFO)
 # Here you can modify the bot's prefix and description and wether it sends help in direct messages or not.
 client = Bot(description="Lingo 2 by Pyroan!", command_prefix=("L!", "!", "l!"), pm_help=True)
 
-settings = configparser.RawConfigParser()
-settings.read('config.cfg')
-# Developer's ID
-dev_id = settings.get('Settings', 'dev_id')
-# Bot token
-token = settings.get('Settings', 'token')
+# Set up configuration
+dev_id = 'Error'
+token = 'Error'
+is_production = os.environ.get('IS_HEROKU"', None)
+if is_production:
+    dev_id = os.environ['DEV_ID']
+    token = os.environ['TOKEN']
+else:
+    settings = configparser.RawConfigParser()
+    settings.read('config.cfg')
+    # Developer's ID
+    dev_id = settings.get('Settings', 'dev_id')
+    # Bot token
+    token = settings.get('Settings', 'token')
 
 # Set up nationality and language lists
 nationalities = []

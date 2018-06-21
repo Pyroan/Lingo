@@ -1,1 +1,1 @@
-web: python3 lingo2.py
+worker: python3 lingo2.py

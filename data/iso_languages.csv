@@ -1,6 +1,7 @@
 SQ,SQI,ALB,Albanian
 AR,ARA,,Arabic
 HY,HYE,ARM,Armenian
+EU,EUS,BAQ,Basque
 BG,BUL,,Bulgarian
 MY,MYA,BUR,Burmese
 CA,CAT,,Catalan
@@ -44,6 +45,7 @@ PA,PAN,PNB,Punjabi
 RO,RUM,RON,Romanian
 RU,RUS,,Russian
 SR,SRP,,Serbian
+,SZL,,Silesian
 ES,SPA,,Spanish
 SV,SWE,,Swedish
 TL,TGL,,Tagalog

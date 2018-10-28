@@ -19,7 +19,7 @@ client = Bot(description="Lingo 2 by Pyroan!", command_prefix=("L!", "!", "l!"),
 # Set up configuration
 dev_id = 'Error'
 token = 'Error'
-is_production = os.environ['IS_HEROKU']
+is_production = False # os.environ['IS_HEROKU']
 if is_production:
     dev_id = os.environ['DEV_ID']
     token = os.environ['TOKEN']
@@ -276,7 +276,7 @@ async def find_language_role(proficiency, language):
 
 # Adds given language and proficiency to user's roles
 @lang.command(name="add", pass_context=True)
-async def l_add(ctx, proficiency=None, language=None):
+async def l_add(ctx, proficiency=None, *, language=None):
     if proficiency is None or proficiency not in proficiencies:
         await client.say("Missing proficiency!\n"
                          "Usage: `L!lang [add|remove] [fluent|conversational|learning] <language name/ISO639 code>`\n"
@@ -302,7 +302,7 @@ async def l_add(ctx, proficiency=None, language=None):
 
 # Removes given language and proficiency from user's roles
 @lang.command(name="remove", aliases=["rem"], pass_context=True)
-async def l_remove(ctx, proficiency=None, language=None):
+async def l_remove(ctx, proficiency=None, *, language=None):
     if proficiency is None or proficiency not in proficiencies:
         await client.say("Missing proficiency!\n"
                          "Usage: `L!lang [add|remove] [fluent|conversational|learning] <language name/ISO639 code>`\n"

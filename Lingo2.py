@@ -13,7 +13,7 @@ import re
 from random import randint
 
 logging.basicConfig(level=logging.INFO)
-# Here you can modify the bot's prefix and description and wether it sends help in direct messages or not.
+# Here you can modify the bot's prefix and description and whether it sends help in direct messages or not.
 client = Bot(description="Lingo 2 by Pyroan!", command_prefix=("L!", "!", "l!"), pm_help=True)
 
 # Set up configuration

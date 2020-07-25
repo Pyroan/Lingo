@@ -41,7 +41,7 @@ client = Bot(description="Lingo 2 by Pyroan!",
 # Set up configuration
 dev_id = 'Error'
 token = 'Error'
-is_production = os.environ['IS_HEROKU']
+is_production = False  # os.environ['IS_HEROKU']
 if is_production:
     dev_id = os.environ['DEV_ID']
     token = os.environ['TOKEN']
@@ -120,13 +120,13 @@ async def on_ready():
 
 # This is a basic example of a call and response command. You tell it do "this" and it does it.
 @client.command(hidden=True)
-async def ping():
-    await client.say(":thumbsup: Yep, I'm awake!")
+async def ping(ctx):
+    await ctx.send(":thumbsup: Yep, I'm awake!")
 
 
 # Mostly a test command. Rolls a die of given size
 @client.command()
-async def roll(*args):
+async def roll(ctx, *args):
     try:
         size = 20
         if len(args) > 0:
@@ -135,19 +135,19 @@ async def roll(*args):
                 arg = arg[1:]
             size = int(arg)
             if size <= 0:
-                await client.say("Size must be bigger than 0!")
+                await ctx.send("Size must be bigger than 0!")
                 return
 
-        await client.say(":game_die: Result of d%d roll: %d" % (size, randint(1, size)))
+        await ctx.send(":game_die: Result of d%d roll: %d" % (size, randint(1, size)))
     except ValueError:
-        await client.say("Correct Usage: `L!roll <size>`")
+        await ctx.send("Correct Usage: `L!roll <size>`")
 
 
 # Output a nicely formatted table of the given list
 @client.command(name="list")
-async def list_all(ls=None):
+async def list_all(ctx, ls=None):
     if ls is None or ls not in ['nationalities', 'languages']:
-        await client.say("Usage: `L!list [nationalities|languages]`")
+        await ctx.send("Usage: `L!list [nationalities|languages]`")
     else:
         lis = []
         field = ''
@@ -166,15 +166,15 @@ async def list_all(ls=None):
             output.append("{:<20}{:<20}\n".format(lis[i], lis[i+1]))
         output.append("```\nNot seeing the {} you're looking for? "
                       "Ask {} to add it!".format(field, dev_id))
-        await client.say(''.join(output))
+        await ctx.send(''.join(output))
 
 
 # Given an ISO code or language, prints out the languages name and ISO codes
 # If a query matches multiple languages, they'll all be printed.
 @client.command(aliases=["whatis", "iso", "search"])
-async def lookup(*, query=None):
+async def lookup(ctx, *, query=None):
     if query is None:
-        await client.say("Usage: `L!lookup <query>`")
+        await ctx.send("Usage: `L!lookup <query>`")
         return
     found = {'exact': [], 'other': []}
     # Find ALL languages that match the query
@@ -188,8 +188,8 @@ async def lookup(*, query=None):
                 found['other'].append(entry)
                 break
     if len(found) == 0:
-        await client.say("No languages found for `{}`\n"
-                         "For a list of available languages, try `L!list languages`".format(query))
+        await ctx.send("No languages found for `{}`\n"
+                       "For a list of available languages, try `L!list languages`".format(query))
     else:
         output = ["Matching languages:\n```\n"]
         output.append("{:<16}{:<9}\n".format("Language", "ISO Codes"))
@@ -205,15 +205,15 @@ async def lookup(*, query=None):
             output.append("{:<16}{:<5}{:<5}{:<5}\n".format(entry['name'], entry['iso_639'],
                                                            entry['iso_639_2'], entry['iso_639_2B']))
         output.append("```")
-        await client.say(''.join(output))
+        await ctx.send(''.join(output))
 
 
 # Set/Remove nationality roles
 @client.command(aliases=["country"], pass_context=True)
 async def nationality(ctx, *, country=None):
     if country is None:
-        await client.say("Usage: `L!nationality <country>`\n"
-                         "For a list of available countries, try `L!list nationalities`")
+        await ctx.send("Usage: `L!nationality <country>`\n"
+                       "For a list of available countries, try `L!list nationalities`")
     else:
         # Find the target demonym
         user = ctx.message.author
@@ -226,51 +226,51 @@ async def nationality(ctx, *, country=None):
                 if matcher.fullmatch(alias):
                     country_role = entry['demonym']
         if country_role is None:
-            await client.say("Couldn't find country: `%s`.\n"
-                             "If you're sure you didn't make a mistake, please contact %s.\n"
-                             "(He probably just needs to add it to the list)" % (country, dev_id))
+            await ctx.send("Couldn't find country: `%s`.\n"
+                           "If you're sure you didn't make a mistake, please contact %s.\n"
+                           "(He probably just needs to add it to the list)" % (country, dev_id))
         else:
             new_role = find(lambda r: r.name == country_role,
-                            ctx.message.server.roles)
+                            ctx.message.guild.roles)
             if new_role is not None:
                 # Remove any current nationality roles
                 for role in user.roles:
                     if role.name in list(map(lambda x: x['demonym'], nationalities)):
-                        await client.remove_roles(user, role)
+                        await user.remove_roles(role)
                 # Actually add the role.
-                await client.add_roles(user, new_role)
-                await client.say("Set %s's nationality to %s" % (user.mention, country_role))
+                await user.add_roles(new_role)
+                await ctx.send("Set %s's nationality to %s" % (user.mention, country_role))
             else:
-                await client.say("No server role found for `%s`. Nationality unchanged\n"
-                                 "(Ask a moderator to add the role and try again)" % country_role)
+                await ctx.send("No server role found for `%s`. Nationality unchanged\n"
+                               "(Ask a moderator to add the role and try again)" % country_role)
 
 
 # Sets "Verified" role, for users that wish to have a role but don't want to reveal their nationality
 @client.command(pass_context=True)
 async def verify(ctx):
     user = ctx.message.author
-    role = find(lambda r: r.name == "Verified", ctx.message.server.roles)
+    role = find(lambda r: r.name == "Verified", ctx.message.guild.roles)
     if role is not None:
         if role in user.roles:
-            await client.say("You're already verified!")
+            await ctx.send("You're already verified!")
         else:
-            await client.add_roles(user, role)
-            await client.say(":tada: %s is now verified. Welcome!" % user.mention)
+            await user.add_roles(role)
+            await ctx.send(":tada: %s is now verified. Welcome!" % user.mention)
     else:
-        await client.say("This server has no \"Verified\" role. :frowning:")
+        await ctx.send("This server has no \"Verified\" role. :frowning:")
 
 
 # Functions for adding/removing/setting language roles
 @client.group(aliases=["language"], pass_context=True)
 async def lang(ctx):
     if ctx.invoked_subcommand is None:
-        await client.say("Usage: `L!lang [add|remove] [fluent|conversational|learning] <language name | ISO639 code>`\n"
-                         "For a list of available languages, try `L!list languages`")
+        await ctx.send("Usage: `L!lang [add|remove] [fluent|conversational|learning] <language name | ISO639 code>`\n"
+                       "For a list of available languages, try `L!list languages`")
 
 
 # Helper function to construct a language role string
 # Used for !lang add and !lang remove.
-async def find_language_role(proficiency, language):
+async def find_language_role(ctx, proficiency, language):
     matcher = re.compile(language, re.IGNORECASE)
     new_role_name = None
     # Find target ISO code
@@ -284,8 +284,8 @@ async def find_language_role(proficiency, language):
                 else:
                     new_role_name = entry['iso_639_2']
     if new_role_name is None:
-        await client.say("Language not found: %s\n"
-                         "For a list of available languages, try `L!list languages`" % language)
+        await ctx.send("Language not found: %s\n"
+                       "For a list of available languages, try `L!list languages`" % language)
         return
     # Format proficiency
     brackets = None
@@ -302,51 +302,51 @@ async def find_language_role(proficiency, language):
 @lang.command(name="add", pass_context=True)
 async def l_add(ctx, proficiency=None, *, language=None):
     if proficiency is None or proficiency not in proficiencies:
-        await client.say("Missing proficiency!\n"
-                         "Usage: `L!lang [add|remove] [fluent|conversational|learning] <language name/ISO639 code>`\n"
-                         "For a list of available languages, try `L!list languages`")
+        await ctx.send("Missing proficiency!\n"
+                       "Usage: `L!lang [add|remove] [fluent|conversational|learning] <language name/ISO639 code>`\n"
+                       "For a list of available languages, try `L!list languages`")
     elif language is None:
-        await client.say("Missing language!\n"
-                         "Usage: `L!lang [add|remove] [fluent|conversational|learning] <language name/ISO639 code>`\n"
-                         "For a list of available languages, try `L!list languages`")
+        await ctx.send("Missing language!\n"
+                       "Usage: `L!lang [add|remove] [fluent|conversational|learning] <language name/ISO639 code>`\n"
+                       "For a list of available languages, try `L!list languages`")
     else:
         user = ctx.message.author
-        new_role_name = await find_language_role(proficiency, language)
+        new_role_name = await find_language_role(ctx, proficiency, language)
         if new_role_name is None:
             return
         # Try to find role. If it doesn't exist, create one
         new_role = find(lambda r: r.name == new_role_name,
-                        ctx.message.server.roles)
+                        ctx.message.guild.roles)
         if new_role is None:
-            new_role = await client.create_role(ctx.message.server, name=new_role_name)
+            new_role = await client.create_role(ctx.message.guild, name=new_role_name)
         if new_role in user.roles:
-            await client.say("You already have this role!")
+            await ctx.send("You already have this role!")
         else:
-            await client.add_roles(user, new_role)
-            await client.say("Added %s to %s's languages" % (new_role_name, user.mention))
+            await user.add_roles(new_role)
+            await ctx.send("Added %s to %s's languages" % (new_role_name, user.mention))
 
 
 # Removes given language and proficiency from user's roles
 @lang.command(name="remove", aliases=["rem"], pass_context=True)
 async def l_remove(ctx, proficiency=None, *, language=None):
     if proficiency is None or proficiency not in proficiencies:
-        await client.say("Missing proficiency!\n"
-                         "Usage: `L!lang [add|remove] [fluent|conversational|learning] <language name/ISO639 code>`\n"
-                         "For a list of available languages, try `L!list languages`")
+        await ctx.send("Missing proficiency!\n"
+                       "Usage: `L!lang [add|remove] [fluent|conversational|learning] <language name/ISO639 code>`\n"
+                       "For a list of available languages, try `L!list languages`")
     elif language is None:
-        await client.say("Missing language!\n"
-                         "Usage: `L!lang [add|remove] [fluent|conversational|learning] <language name/ISO639 code>`\n"
-                         "For a list of available languages, try `L!list languages`")
+        await ctx.send("Missing language!\n"
+                       "Usage: `L!lang [add|remove] [fluent|conversational|learning] <language name/ISO639 code>`\n"
+                       "For a list of available languages, try `L!list languages`")
     else:
         user = ctx.message.author
-        role_name = await find_language_role(proficiency, language)
+        role_name = await find_language_role(ctx, proficiency, language)
         # Try to find role. If it doesn't exist, say error message.
-        role = find(lambda r: r.name == role_name, ctx.message.server.roles)
+        role = find(lambda r: r.name == role_name, ctx.message.guild.roles)
         if role is None or role not in user.roles:
-            await client.say("You don't have this role!")
+            await ctx.send("You don't have this role!")
         else:
-            await client.remove_roles(user, role)
-            await client.say("Removed %s from %s's languages" % (role_name, user.mention))
+            await user.remove_roles(role)
+            await ctx.send("Removed %s from %s's languages" % (role_name, user.mention))
 
 
 # Check a given user's languages
@@ -355,9 +355,10 @@ async def langs(ctx, user=None):
     if user is None:
         user = ctx.message.author
     else:
-        user = find(lambda m: m.mention == user, ctx.message.server.members)
+        user = find(lambda m: m.mentioned_in(
+            ctx.message), ctx.message.guild.members)
         if user is None:
-            await client.say("User not found. Did you @mention them?")
+            await ctx.send("User not found. Did you @mention them?")
             return
     user_langs = {'Fluent': [], 'Conversational': [], 'Learning': []}
     matcher = re.compile("[\[(/]\w{2,3}[\])/]")
@@ -383,7 +384,7 @@ async def langs(ctx, user=None):
             user_langs[proficiency].append(language)
     # Print language table
     if not found:
-        await client.say("{} hasn't added any languages yet!".format(user.name))
+        await ctx.send("{} hasn't added any languages yet!".format(user.name))
         return
     output = ["Listing languages for {}:\n```\n".format(user.name)]
     for s in ['Fluent', 'Conversational', 'Learning']:
@@ -391,7 +392,7 @@ async def langs(ctx, user=None):
         for entry in user_langs[s]:
             output.append("{}: {}\n".format(entry, s))
     output.append("```")
-    await client.say(''.join(output))
+    await ctx.send(''.join(output))
 
 ############################
 #       MOD COMMANDS       #
@@ -403,7 +404,7 @@ async def langs(ctx, user=None):
 @client.group(hidden=True, pass_context=True)
 @commands.has_role("Moderator")
 async def host(ctx, *args):
-    await client.say("`host` not yet implemented :D")
+    await ctx.send("`host` not yet implemented :D")
 
 
 @host.command(name="add")
@@ -428,14 +429,14 @@ async def warn(ctx, user=None, *, message=None):
 @commands.has_role("Moderator")
 async def update(ctx, ls=None):
     if ls not in ['nationalities', 'languages', 'all']:
-        await client.say("Please specify: nationalities, languages, or all?")
+        await ctx.send("Please specify: nationalities, languages, or all?")
     else:
         if ls == 'languages' or ls == 'all':
             init_languages()
-            await client.say("Updated languages.")
+            await ctx.send("Updated languages.")
         if ls == 'nationalities' or ls == 'all':
             init_nationalities()
-            await client.say("Updated nationalities.")
+            await ctx.send("Updated nationalities.")
 
 
 client.run(token)

@@ -165,7 +165,7 @@ async def list_all(ctx, ls=None):
         for i in range(0, len(lis), 2):
             output.append("{:<20}{:<20}\n".format(lis[i], lis[i+1]))
         output.append("```\nNot seeing the {} you're looking for? "
-                      "Ask {} to add it!".format(field, dev_id))
+                      "Ask a moderator to have it added!".format(field))
         await ctx.send(''.join(output))
 
 
@@ -227,8 +227,8 @@ async def nationality(ctx, *, country=None):
                     country_role = entry['demonym']
         if country_role is None:
             await ctx.send("Couldn't find country: `%s`.\n"
-                           "If you're sure you didn't make a mistake, please contact %s.\n"
-                           "(He probably just needs to add it to the list)" % (country, dev_id))
+                           "If you're sure you didn't make a mistake, please contact a moderator.\n"
+                           "(It probably just needs to be added to the list)" % (country))
         else:
             new_role = find(lambda r: r.name == country_role,
                             ctx.message.guild.roles)

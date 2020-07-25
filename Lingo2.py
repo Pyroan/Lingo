@@ -12,9 +12,14 @@ import configparser
 import re
 from random import randint
 
+# Bad hack to keep this alive even though discord tried to kill it
+from collections import namedtuple
+Overwrites = namedtuple('Overwrites', 'id allow deny type deny_new allow_new')
+
 logging.basicConfig(level=logging.INFO)
 # Here you can modify the bot's prefix and description and whether it sends help in direct messages or not.
-client = Bot(description="Lingo 2 by Pyroan!", command_prefix=("L!", "!", "l!"), pm_help=True)
+client = Bot(description="Lingo 2 by Pyroan!",
+             command_prefix=("L!", "!", "l!"), pm_help=True)
 
 # Set up configuration
 dev_id = 'Error'
@@ -51,7 +56,8 @@ def init_nationalities():
                 if alias != '':
                     new['aliases'].append(alias)
             nationalities.append(new)
-        print("LINGO: %d Nationalities loaded successfully" % len(nationalities))
+        print("LINGO: %d Nationalities loaded successfully" %
+              len(nationalities))
 
 
 def init_languages():
@@ -78,11 +84,11 @@ def init_languages():
 # Additionally, calls setup functions
 @client.event
 async def on_ready():
-    print('Logged in as ' + client.user.name + ' (ID:' + client.user.id + ') | Connected to ' + str(
-        len(client.servers)) + ' servers | Connected to ' + str(len(set(client.get_all_members()))) + ' users')
-    print('--------')
-    print('Current Discord.py Version: {} | Current Python Version: {}'.format(discord.__version__,
-                                                                               platform.python_version()))
+    # print('Logged in as ' + client.user.name + ' (ID:' + str(client.user.id) + ') | Connected to ' +
+    #    str(len(client.servers)) + ' servers | Connected to ' + str(len(set(client.get_all_members()))) + ' users')
+    # print('--------')
+    # print('Current Discord.py Version: {} | Current Python Version: {}'.format(discord.__version__,
+    #                                                                           platform.python_version()))
     print('--------')
     print('Use this link to invite {}:'.format(client.user.name))
     print('https://discordapp.com/oauth2/authorize?client_id={}&scope=bot&permissions=8'.format(client.user.id))
@@ -207,7 +213,8 @@ async def nationality(ctx, *, country=None):
                              "If you're sure you didn't make a mistake, please contact %s.\n"
                              "(He probably just needs to add it to the list)" % (country, dev_id))
         else:
-            new_role = find(lambda r: r.name == country_role, ctx.message.server.roles)
+            new_role = find(lambda r: r.name == country_role,
+                            ctx.message.server.roles)
             if new_role is not None:
                 # Remove any current nationality roles
                 for role in user.roles:
@@ -288,9 +295,11 @@ async def l_add(ctx, proficiency=None, *, language=None):
     else:
         user = ctx.message.author
         new_role_name = await find_language_role(proficiency, language)
-        if new_role_name is None: return
+        if new_role_name is None:
+            return
         # Try to find role. If it doesn't exist, create one
-        new_role = find(lambda r: r.name == new_role_name, ctx.message.server.roles)
+        new_role = find(lambda r: r.name == new_role_name,
+                        ctx.message.server.roles)
         if new_role is None:
             new_role = await client.create_role(ctx.message.server, name=new_role_name)
         if new_role in user.roles:
@@ -335,7 +344,7 @@ async def langs(ctx, user=None):
             return
     user_langs = {'Fluent': [], 'Conversational': [], 'Learning': []}
     matcher = re.compile("[\[(/]\w{2,3}[\])/]")
-    found = False # Flag that proves we found at least one role
+    found = False  # Flag that proves we found at least one role
     # Search through user roles for languages
     for role in user.roles:
         if matcher.fullmatch(role.name):

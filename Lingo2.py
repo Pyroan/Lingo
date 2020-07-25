@@ -13,8 +13,25 @@ import re
 from random import randint
 
 # Bad hack to keep this alive even though discord tried to kill it
-from collections import namedtuple
-Overwrites = namedtuple('Overwrites', 'id allow deny type deny_new allow_new')
+
+
+class Overwrites:
+    __slots__ = ('id', 'allow', 'deny', 'type')
+
+    def __init__(self, **kwargs):
+        self.id = kwargs.pop('id')
+        self.allow = kwargs.pop('allow', 0)
+        self.deny = kwargs.pop('deny', 0)
+        self.type = kwargs.pop('type')
+
+    def _asdict(self):
+        return {
+            'id': self.id,
+            'allow': self.allow,
+            'deny': self.deny,
+            'type': self.type,
+        }
+
 
 logging.basicConfig(level=logging.INFO)
 # Here you can modify the bot's prefix and description and whether it sends help in direct messages or not.
